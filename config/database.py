@@ -13,11 +13,13 @@ class Database:
     def get_connection(self):
         try:
             self.conn = mysql.connector.connect(
-                host=self.host,
-                database=self.db_name,
-                user=self.username,
-                password=self.password
-            )
+            host=self.host,
+            port=3306,
+            database=self.db_name,
+            user=self.username,
+            password=self.password,
+            use_pure=True
+        )
 
             if self.conn.is_connected():
                 return self.conn

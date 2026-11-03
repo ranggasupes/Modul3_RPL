@@ -6,16 +6,18 @@ from views.buku_view import BukuView
 
 
 class BukuController:
-    def __init__(self, user_role="anggota"):
+    def __init__(self, user_role="anggota", master=None, on_logout=None):
         self.user_role = user_role
+        self.on_logout = on_logout
         self.model = BukuModel()
-        self.view = BukuView()
+        self.view = BukuView(master)
 
-        self.id_terpilih = None
+        self.id_buku_terpilih = None
 
         self.view.btn_simpan.configure(command=self.simpan_data)
         self.view.btn_hapus.configure(command=self.hapus_data)
         self.view.btn_update.configure(command=self.update_data)
+        self.view.btn_logout.configure(command=self.logout)
 
         self.view.tabel.bind("<<TreeviewSelect>>", self.pilih_data)
 
@@ -86,22 +88,23 @@ class BukuController:
     # MENYIMPAN DATA BARU
     def simpan_data(self):
         if self.user_role != "admin":
-            messagebox.showerror("Akses Ditolak","Anda tidak memiliki izin untuk menambah data.")
+            messagebox.showerror("Akses Ditolak", "Anda tidak memiliki izin untuk menambah data.")
             return
+
         judul = self.view.entry_judul.get().strip()
         penulis = self.view.entry_penulis.get().strip()
         tahun = self.view.entry_tahun.get().strip()
 
         if not judul or not penulis or not tahun:
             messagebox.showwarning(
-                "Peringatan","Semua kolom form harus diisi!")
+                "Peringatan", "Semua kolom form harus diisi!")
             return
 
         try:
             tahun = int(tahun)
         except ValueError:
             messagebox.showwarning(
-                "Peringatan","Tahun terbit harus berupa angka!")
+                "Peringatan", "Tahun terbit harus berupa angka!")
             return
 
         berhasil = self.model.create_buku(
@@ -110,14 +113,21 @@ class BukuController:
 
         if berhasil:
             messagebox.showinfo(
-                "Sukses","Data buku berhasil disimpan!")
+                "Sukses", "Data buku berhasil disimpan!")
             self.bersihkan_form()
             self.muat_data_tabel()
         else:
-            messagebox.showerror("Error","Data gagal disimpan. Periksa koneksi database.")
+            messagebox.showerror("Error", "Data gagal disimpan. Periksa koneksi database.")
 
     # MEMPERBARUI DATA
     def update_data(self):
+        if self.user_role != "admin":
+            messagebox.showerror(
+                "Akses Ditolak",
+                "Anda tidak memiliki izin untuk memperbarui data!"
+            )
+            return
+
         if self.id_buku_terpilih is None:
             messagebox.showwarning(
                 "Peringatan",
@@ -175,6 +185,13 @@ class BukuController:
 
     # MENGHAPUS DATA
     def hapus_data(self):
+        if self.user_role != "admin":
+            messagebox.showerror(
+                "Akses Ditolak",
+                "Anda tidak memiliki izin untuk menghapus data!"
+            )
+            return
+
         if self.id_buku_terpilih is None:
             messagebox.showwarning(
                 "Peringatan",
@@ -206,6 +223,13 @@ class BukuController:
                 "Error",
                 "Data gagal dihapus. Periksa koneksi database."
             )
+
+    # LOGOUT
+    def logout(self):
+        self.view.destroy()
+
+        if self.on_logout:
+            self.on_logout()
 
     # MENJALANKAN APLIKASI
     def run(self):

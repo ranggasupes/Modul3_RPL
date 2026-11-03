@@ -1,10 +1,10 @@
-
 import customtkinter as ctk
 from tkinter import ttk
 
-class BukuView(ctk.CTk):
-    def __init__(self):
-        super().__init__()
+
+class BukuView(ctk.CTkToplevel):
+    def __init__(self, master=None):
+        super().__init__(master)
 
         # Tema utama
         ctk.set_appearance_mode("light")
@@ -128,6 +128,19 @@ class BukuView(ctk.CTk):
             corner_radius=8
         )
         self.btn_hapus.pack(
+            pady=10, padx=15, fill="x"
+        )
+
+        # Tombol Logout
+        self.btn_logout = ctk.CTkButton(
+            self.frame_kiri,
+            text="Logout",
+            fg_color="red",
+            text_color=putih,
+            hover_color="#CC0000",
+            corner_radius=8
+        )
+        self.btn_logout.pack(
             pady=10, padx=15, fill="x"
         )
 

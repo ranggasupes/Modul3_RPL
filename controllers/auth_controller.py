@@ -15,22 +15,43 @@ class AuthController:
         password = self.view.entry_password.get()
 
         if not username or not password:
-            messagebox.showwarning("Peringatan", "Username dan Password wajib diisi")
+            messagebox.showwarning(
+                "Peringatan",
+                "Username dan Password wajib diisi"
+            )
             return
 
         user = self.model.autentikasi(username, password)
 
         if user:
-            messagebox.showinfo("Login berhasil", f"Selamat datang, {user['username']} ({user['role']})")
+            messagebox.showinfo(
+                "Login berhasil",
+                f"Selamat datang, {user['username']} ({user['role']})"
+            )
 
-            # Tutup jendela Login
-            self.view.destroy()
+            # Sembunyikan jendela Login
+            self.view.withdraw()
 
             # Buka jendela utama Perpustakaan dengan mengirimkan role pengguna
-            app_utama = BukuController(user_role=user['role'])
-            app_utama.run()
+            app_utama = BukuController(
+                user_role=user['role'],
+                master=self.view,
+                on_logout=self.logout
+            )
+
         else:
-            messagebox.showerror("Login Gagal", "Username atau Password salah")
+            messagebox.showerror(
+                "Login Gagal",
+                "Username atau Password salah"
+            )
+
+    def logout(self):
+        # Tampilkan kembali jendela Login
+        self.view.deiconify()
+
+        # Kosongkan input username dan password
+        self.view.entry_username.delete(0, "end")
+        self.view.entry_password.delete(0, "end")
 
     def run(self):
         self.view.mainloop()
